@@ -1,25 +1,28 @@
 import pandas as pd
-from author_node import *;
-from essay_node import *;
+from author_node import Author;
+from essay_node import Essay;
 
 # Excel'den veriyi çekme
 data = pd.read_excel('DATASET.xlsx',nrows=10)
 
-data['coauthors'] = data['coauthors'].apply(lambda x: x.split(',') if x else [])
+essay_data = data[['doi', 'paper_title']]
 
-top_10_data = data.head(10)
-
-# Makale adına göre yardımcı yazarları ekrana basan fonksiyon
-def print_co_authors(article_name):
-    # Makaleyi bul
-    row = top_10_data[top_10_data["paper_title"] == article_name]
-    
-    if not row.empty:
-        co_authors = row.iloc[0]["coauthors"]
-        print(f"Makaleye ait yardımcı yazarlar: {', '.join(co_authors) if co_authors else 'Yardımcı yazar yok.'}")
+head = None
+current = None
+# Create the linked list
+for index, row in essay_data.iterrows():
+    essay_id = row['doi']
+    essay_title = row['paper_title']
+    new_essay = Essay(essay_id, essay_title)
+    if head is None:
+        head = new_essay  # Set the head of the linked list
+        current = head
     else:
-        print("Makale bulunamadı.")
+        current.next = new_essay  # Link the new essay
+        current = new_essay  # Move to the new essay
 
-# Örnek kullanım
-article_name_input = input("Makale adını girin: ")
-print_co_authors(article_name_input)
+
+while head:
+    head.getId()
+    head = head.next
+    
