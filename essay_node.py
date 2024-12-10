@@ -1,10 +1,9 @@
 class Essay:
-    def __init__(self,ID,title,coAuthors,author,next=None):
+    def __init__(self,ID,title,coAuthors,next=None):
         self.ID=ID
         self.title=title
         self.next=next
         self.coAuthors = coAuthors
-        self.author = author
 
     def __str__(self):
         return str(self.name)
@@ -26,9 +25,5 @@ class Essay:
             return 
         return self.coAuthors
     
-    def getAuthors(self):
-        if self.author is None:
-            return 
-        return self.author
     
     
