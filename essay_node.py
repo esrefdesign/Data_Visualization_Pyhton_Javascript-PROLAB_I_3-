@@ -1,9 +1,11 @@
+
 class Essay:
-    def __init__(self,ID,title,coAuthors,next=None):
+    def __init__(self,ID,title,author,next=None):
         self.ID=ID
         self.title=title
         self.next=next
-        self.coAuthors = coAuthors
+        
+        self.author = author
 
     def __str__(self):
         return str(self.name)
@@ -20,10 +22,7 @@ class Essay:
             return
         return self.title
     
-    def getAuthors(self):
-        if self.coAuthors is None:
-            return 
-        return self.coAuthors
+   
     
     
     
