@@ -4,44 +4,31 @@ from essay_node import Essay
 from bstNode import BST,BSTNode
 from priorityQueue import PriorityQueue
 from graph import Graph
+from collections import defaultdict
 #import All neededs
 
+data = pd.read_excel('DATASET.xlsx')
 
-# Excel'den veriyi çekme
+authors = data[['author_name','orcid']].drop_duplicates()
+essays = data[['doi','paper_title','coauthors']].drop_duplicates()
 
-data = pd.read_excel('DATASET.xlsx',nrows=400)
+essay_nodes =  defaultdict(str)
+unique_authors = defaultdict(str)
 
-head = None
-current = None
+for _, row in authors.iterrows():
+    author = Author(row['orcid'],row['author_name'])
+    unique_authors[row['orcid']] = author
 
-authors = data['author_name']
-essays = data[['doi','paper_title']].drop_duplicates()
+for orcid, paper_title ,doi,coauthors in zip(authors['orcid'],essays['paper_title'],essays['doi'],essays['coauthors']):
+    coauthors_array = coauthors.strip('[]').replace("'", "").split(',')
+    coauthors_array = [name.strip() for name in coauthors_array]
+    
+    essay = Essay(doi,paper_title,coauthors_array)
+    unique_authors[orcid].essay.add(essay)
 
-author_to_id = {author: idx for idx, author in enumerate(set(authors))}
+for orcid in unique_authors.values():
+    for a in orcid.essay:
+        for b in a.coauthors:
+            print(b)
 
-# Her yazarı bir kez yazdırma
-unique_authors = [{'Author': author, 'Author_ID': author_to_id[author]} for author in author_to_id]
-unique_essay = [{'Essay_ID': row['doi'], 'Essay_Title': row['paper_title']} for _, row in essays.iterrows()]
-
-for entry in unique_essay:
-    new_author= Essay(entry['Essay_ID'],entry['Essay_Title'])
-    if head is None:
-        head = new_author # Set the head of the linked list
-        current = head
-    else:
-        current.next = new_author  # Link the new essay
-        current = new_author # Move to the new essay
-    print(f"{current.name}    {current.Id}")
-
-
-# Sonuçları yazdırma
-for entry in unique_authors:
-    new_author= Author(entry['Author_ID'],entry['Author'])
-    if head is None:
-        head = new_author # Set the head of the linked list
-        current = head
-    else:
-        current.next = new_author  # Link the new essay
-        current = new_author # Move to the new essay
-    print(f"{current.name}    {current.Id}")
 
