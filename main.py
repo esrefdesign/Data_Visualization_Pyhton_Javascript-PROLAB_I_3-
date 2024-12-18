@@ -1,48 +1,65 @@
 import pandas as pd
 from author_node import Author
-from essay_node import Essay
 from pyvis.network import Network
-from bstNode import BST,BSTNode
-from priorityQueue import PriorityQueue
 from graph import Graph
 from collections import defaultdict
-#import All neededs
-
-data = pd.read_excel('DATASET.xlsx')
-
-g = Network(height="1500px",width="2000", bgcolor= '#222222', font_color='white')
-
-
-
-authors = data[['author_name','orcid']].drop_duplicates()
-essays = data[['doi','paper_title','coauthors']].drop_duplicates()
-
-essay_nodes =  defaultdict(str)
-unique_authors = defaultdict(str)
-
-for _, row in authors.iterrows():
-    author = Author(row['orcid'],row['author_name'])
-    unique_authors[row['orcid']] = author
-
-for orcid, paper_title ,doi,coauthors in zip(authors['orcid'],essays['paper_title'],essays['doi'],essays['coauthors']):
-    coauthors_array = coauthors.strip('[]').replace("'", "").split(',')
-    coauthors_array = [name.strip() for name in coauthors_array]
-    
-    essay = Essay(doi,paper_title,coauthors_array)
-    unique_authors[orcid].essay.add(essay)
-
-for orcid in unique_authors.values():
-    for a in orcid.essay:
-        for b in a.coauthors:
-            
-            node=[200, len(b), b, 5, 5, b, '22222']
-            g.add_nodes(node)
-                         
-                        
-g.write_html("graph.html")
-
-
-# Manuel olarak tarayıcıda aç
 import webbrowser
-webbrowser.open("test.html")
 
+# Veriyi yükle
+data = pd.read_excel('DATASET.xlsx', nrows=1000)
+
+# Pyvis ağı - Fizik ayarları optimize edildi
+g = Network(height="1500px", width="2000px", bgcolor='#444444', font_color='white', notebook=False)
+g.barnes_hut()
+
+# Graph nesnesi
+graph = Graph()
+unique_authors = {}  # Yazarların benzersiz olması için sözlük
+edges = set()  # Tekrarlı kenarları engellemek için set kullanımı
+
+# Makale bilgilerini işle ve bağlantıları oluştur
+for _, row in data.iterrows():
+    if pd.notna(row['coauthors']):
+        # Ana yazar ve coauthor'ları al
+        author = row['author_name'].strip() if pd.notna(row['author_name']) else "Unknown Author"
+        coauthors = row['coauthors'].strip('[]').replace("'", "").split(',')
+        coauthors = list(set(name.strip() for name in coauthors))  # Benzersiz coauthor listesi
+        
+        # Ana yazar düğümünü ekle
+        if author not in unique_authors:
+            unique_authors[author] = Author("None", author)
+            graph.add_node(author)
+
+        # Coauthor düğümlerini ekle ve ana yazarla bağlantı kur
+        for coauthor in coauthors:
+            # Eğer coauthor ana yazarın kendisiyle aynıysa, atla
+            if coauthor == author:
+                continue  # Kendisiyle bağlantı oluşturmayı engelle
+            
+            if coauthor not in unique_authors:
+                unique_authors[coauthor] = Author("None", coauthor)
+                graph.add_node(coauthor)
+            
+            # Sadece ana yazar ile coauthor arasında bağlantı oluştur
+            edge = tuple(sorted((author, coauthor)))
+            if edge not in edges:
+                edges.add(edge)
+                graph.add_edge(author, coauthor)
+        
+
+# Pyvis ağına düğümleri ekle
+for author in unique_authors:
+    size = min(20 + 2*len(graph.adj_list[author]), 150)  # Bağlantı sayısına göre boyut
+    color = '#00aaff' if len(graph.adj_list[author]) > 10 else '#7777ff'
+    g.add_node(author, label=author, size=size, color=color)
+
+# Pyvis ağına kenarları ekle
+print(len(unique_authors))
+print(len(edges))
+for edge in edges:
+    g.add_edge(edge[0], edge[1], width=1)
+
+# HTML çıktısını oluştur ve tarayıcıda aç
+output_file = "fixed_graph.html"
+g.write_html(output_file)
+webbrowser.open(output_file)
