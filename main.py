@@ -61,5 +61,25 @@ for edge in edges:
 
 # HTML çıktısını oluştur ve tarayıcıda aç
 output_file = "fixed_graph.html"
+
+
+g.set_options("""
+var options = {
+  "physics": {
+    "enabled": true,
+    "solver": "forceAtlas2Based",
+    "forceAtlas2Based": {
+      "gravitationalConstant": -50,
+      "centralGravity": 0.01,
+      "springLength": 50,
+      "springConstant": 0.02
+    },
+    "maxVelocity": 50,
+    "minVelocity": 0.1
+  }
+}
+""")
+
+
 g.write_html(output_file)
 webbrowser.open(output_file)
