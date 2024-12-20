@@ -61,5 +61,42 @@ for edge in edges:
 
 # HTML çıktısını oluştur ve tarayıcıda aç
 output_file = "fixed_graph.html"
+
+
+g.set_options("""
+var options = {
+  "physics": {
+    "enabled": true,
+    "solver": "forceAtlas2Based",
+    "forceAtlas2Based": {
+      "gravitationalConstant": -50,
+      "centralGravity": 0.01,
+      "springLength": 50,
+      "springConstant": 0.02
+    },
+    "maxVelocity": 50,
+    "minVelocity": 0.1
+  }
+}
+""")
+
+
 g.write_html(output_file)
+
+
+js_link = '<script src="custom_script.js"></script>'
+
+# HTML dosyasını düzenle
+with open(output_file, "r", encoding="utf-8") as file:
+    html_content = file.read()
+
+# </head>'den önce JavaScript dosyasını ekleyin
+if js_link not in html_content:  # Aynı script eklenmesin diye kontrol
+    html_content = html_content.replace("</head>", f"{js_link}\n</head>")
+
+# Düzenlenmiş HTML'yi geri yaz
+with open(output_file, "w", encoding="utf-8") as file:
+    file.write(html_content)
+
 webbrowser.open(output_file)
+
