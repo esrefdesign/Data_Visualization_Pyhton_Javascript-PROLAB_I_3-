@@ -5,6 +5,7 @@ class Essay:
         self.title=title
         self.coauthors = coauthors;
         
+        
  
    
     

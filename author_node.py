@@ -4,5 +4,6 @@ class Author:
         self.name=name
         self.orcid = orcid
         self.essay=set()
+        
 
     
