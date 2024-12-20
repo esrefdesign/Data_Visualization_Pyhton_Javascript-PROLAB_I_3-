@@ -82,4 +82,21 @@ var options = {
 
 
 g.write_html(output_file)
+
+
+js_link = '<script src="custom_script.js"></script>'
+
+# HTML dosyasını düzenle
+with open(output_file, "r", encoding="utf-8") as file:
+    html_content = file.read()
+
+# </head>'den önce JavaScript dosyasını ekleyin
+if js_link not in html_content:  # Aynı script eklenmesin diye kontrol
+    html_content = html_content.replace("</head>", f"{js_link}\n</head>")
+
+# Düzenlenmiş HTML'yi geri yaz
+with open(output_file, "w", encoding="utf-8") as file:
+    file.write(html_content)
+
 webbrowser.open(output_file)
+
