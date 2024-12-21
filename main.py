@@ -66,7 +66,7 @@ wanteds = Wanted(unique_authors,unique_essasys)
 
 # Pyvis ağına kenarları ekle
 
-print(wanteds.wanted_5('R. Kumar'))
+print(wanteds.wanted_5('B. Rajakumar'))
 
 print(len(edges))
 
@@ -74,7 +74,7 @@ for edge in edges:
     g.add_edge(edge[0], edge[1], width=1)
 
 # HTML çıktısını oluştur ve tarayıcıda aç
-output_file = "fixed_graph.html"
+output_file = "web/static/fixed_graph.html"
 
 
 g.set_options("""
@@ -98,7 +98,7 @@ var options = {
 g.write_html(output_file)
 
 
-js_link = '<script src="custom_script.js"></script>'
+js_link = '<script src="/static/custom_script.js"></script>'
 
 # HTML dosyasını düzenle
 with open(output_file, "r", encoding="utf-8") as file:
@@ -112,5 +112,4 @@ if js_link not in html_content:  # Aynı script eklenmesin diye kontrol
 with open(output_file, "w", encoding="utf-8") as file:
     file.write(html_content)
 
-# webbrowser.open(output_file)
 

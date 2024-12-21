@@ -92,11 +92,31 @@ function setupButtonActions(graphData) {
     };
 
     // 5. İşbirliği yaptığı yazar sayısının hesaplanması
-    document.getElementById('button5').onclick = () => {
-        const authorA = prompt("A yazarının ID'sini giriniz:");
+    document.getElementById('button5').onclick = async () => {
+        const authorA = prompt("A yazarının ID'sini giriniz:"); // Kullanıcıdan yazar ID'sini al
         if (authorA) {
-            const count = countCollaborators(graphData, authorA);
-            alert(`${authorA} yazarının toplam işbirliği yaptığı yazar sayısı: ${count}`);
+            try {
+                // Flask API'ye POST isteği gönder
+                const response = await fetch("http://127.0.0.1:5000/wanted_5", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"  // JSON formatını belirle
+                    },
+                    body: JSON.stringify({ author_name: authorA })  // JSON verisini gönder
+                });
+    
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(`Hata: ${errorData.error || "Bilinmeyen bir hata oluştu."}`);
+                    return;
+                }
+    
+                const data = await response.json(); // API'den dönen yanıtı al
+                alert(`${authorA} yazarının toplam işbirliği yaptığı yazar sayısı: ${data.coauthor_count}`);
+            } catch (error) {
+                console.error("Fetch hatası:", error);
+                alert("Bir hata oluştu. Lütfen bağlantınızı kontrol edin.");
+            }
         }
     };
 
