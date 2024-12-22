@@ -17,7 +17,7 @@ g.barnes_hut()
 graph = Graph()
 unique_authors = defaultdict()  # Yazarların benzersiz olması için sözlük
 edges = set() 
-unique_essasys= defaultdict(str) # Tekrarlı kenarları engellemek için set kullanımı
+unique_essasys= list() # Tekrarlı kenarları engellemek için set kullanımı
 
 # Makale bilgilerini işle ve bağlantıları oluştur
 for _, row in data.iterrows():
@@ -30,15 +30,14 @@ for _, row in data.iterrows():
         essay_ID = row['doi']
         coauthors = list(set(name.strip() for name in coauthors))  # Benzersiz coauthor listesi
         
-        if essay_ID not in unique_essasys:
-            current_essay= Essay(essay_ID,essay_title,coauthors)
-            unique_essasys[essay_ID]=current_essay.title
         # Ana yazar düğümünü ekle
         if author not in unique_authors:
             unique_authors[author] = Author(author_Id, author)
-            unique_authors[author].essay.add(current_essay)
             graph.add_node(author)
-
+        
+        current_essay= Essay(essay_ID,essay_title,coauthors)
+        unique_authors[author].essay.append(current_essay)
+        
         # Coauthor düğümlerini ekle ve ana yazarla bağlantı kur
         for coauthor in coauthors:
             # Eğer coauthor ana yazarın kendisiyle aynıysa, atla"
@@ -61,13 +60,13 @@ for author,author_obj in unique_authors.items():
     size = min(20 + 2*len(graph.adj_list[author]), 150)  # Bağlantı sayısına göre boyut
     color = '#00aaff' if len(graph.adj_list[author]) > 5 else '#7777ff'
     essays = [f"{essay.title} (ID: {essay.ID})" for essay in author_obj.essay]  # Makale bilgilerini al
-    essays_text = essays if essays else "No essays available"
+    essays_text = "\n".join(essays) if essays else "No essays available"
 
     title = f"""
     {author}
     Connections:{len(graph.adj_list[author])}
     Essays:{essays_text}
-    """ if len(graph.adj_list[author])!=1 else f""""
+    """ if len(graph.adj_list[author])!=1 else f"""
     {author}
     Connections:{graph.adj_list[author]}
     Essays:{essays_text}

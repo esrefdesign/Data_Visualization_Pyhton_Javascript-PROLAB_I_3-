@@ -15,4 +15,7 @@ class Wanted:
         else:
             return {"error": f"{name} isimli yazar bulunamadı."}
 
+    def wanted_6(self):
+        most_collaborative = max(self.graph.adj_list.items(), key=lambda x: len(x[1]))
+        return {"name": most_collaborative[0], "count": len(most_collaborative[1])}
         
