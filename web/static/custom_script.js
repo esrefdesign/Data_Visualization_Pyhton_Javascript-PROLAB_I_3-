@@ -66,12 +66,48 @@ function setupButtonActions(graphData) {
 
     // 2. A ve işbirliği yaptığı yazarlar için düğüm ağırlıklarına göre kuyruk
     document.getElementById('button2').onclick = () => {
-        const authorA = prompt("A yazarının ID'sini giriniz:");
-        if (authorA) {
-            const queue = createWeightedQueue(graphData, authorA);
-            visualizeQueue(queue);
+        const authorId = document.getElementById('authorIdInput').value; // Kullanıcıdan ID al
+        if (!authorId) {
+            alert("Lütfen bir yazar ID'si girin.");
+            return;
         }
+    
+        fetch('/wanted_2', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ author_id: authorId }) // Flask'a gönderilecek veri
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(`Hata: ${data.error}`);
+                return;
+            }
+    
+            // Kuyruk işlemleri
+            const queue = [...data]; // Gelen veriyi kuyruğa aktar
+            const queueDiv = document.getElementById('queue');
+            queueDiv.innerHTML = ""; // Kuyruğu sıfırla
+    
+            queue.forEach((item, index) => {
+                setTimeout(() => {
+                    const element = document.createElement('div');
+                    element.innerText = `Yazar: ${item.name}, Ağırlık: ${item.weight}`;
+                    queueDiv.appendChild(element);
+                    if (index === queue.length - 1) {
+                        alert("Tüm kuyruk işlemleri tamamlandı!");
+                    }
+                }, index * 1000); // Kuyruk işlemleri arası 1 saniye gecikme
+            });
+        })
+        .catch(error => {
+            console.error('Hata:', error);
+            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+        });
     };
+    
 
     // 3. Kuyruktan BST oluşturma
     document.getElementById('button3').onclick = () => {
@@ -122,10 +158,21 @@ function setupButtonActions(graphData) {
 
     // 6. En çok işbirliği yapan yazarın belirlenmesi
     document.getElementById('button6').onclick = () => {
-        const mostCollaborativeAuthor = findMostCollaborativeAuthor(graphData);
-        alert(`En çok işbirliği yapan yazar: ${mostCollaborativeAuthor.name}, İşbirlikçi sayısı: ${mostCollaborativeAuthor.count}`);
+        fetch('http://127.0.0.1:5000/wanted_6', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`En çok işbirliği yapan yazar: ${data.name}, İşbirlikçi sayısı: ${data.count}`);
+        })
+        .catch(error => {
+            console.error('Hata:', error);
+            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+        });
     };
-
     // 7. En uzun yolun bulunması
     document.getElementById('button7').onclick = () => {
         const authorA = prompt("A yazarının ID'sini giriniz:");
