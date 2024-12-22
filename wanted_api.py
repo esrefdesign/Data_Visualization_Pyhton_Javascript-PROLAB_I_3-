@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from main import unique_authors, unique_essasys
+from main import unique_authors, unique_essasys,graph
 from isterler import Wanted
 from flask_cors import CORS
 app = Flask(__name__, 
@@ -16,7 +16,7 @@ def wanted_5():
     author_name = request.json.get('author_name')
     if not author_name:
         return jsonify({"error": "author_name is required"}), 400  # Hatalı durum için
-    wanteds = Wanted(unique_authors, unique_essasys)
+    wanteds = Wanted(graph,unique_authors, unique_essasys)
     result = wanteds.wanted_5(author_name)
     return jsonify({"coauthor_count": result}),200
 
