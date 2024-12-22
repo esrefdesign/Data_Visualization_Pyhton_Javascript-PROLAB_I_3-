@@ -9,7 +9,11 @@ class Graph:
     def add_node(self, author):
         if author not in self.adj_list:
             self.adj_list[author] = []  # Boş bir liste ile düğümü ekle
-            self.node_degrees[author] = 0  # Bağlantı sayısını başlat
+            self.node_degrees[author] = 0
+            
+
+    
+
 
     def add_edge(self, author1, author2):
         if author2 not in self.adj_list[author1]:
