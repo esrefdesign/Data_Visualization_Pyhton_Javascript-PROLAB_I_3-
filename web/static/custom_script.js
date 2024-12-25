@@ -113,17 +113,19 @@ function setupButtonActions(graphData) {
             return;
         }
 
-        fetch('http://127.0.0.1:5000/wanted_2', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ author_name: authorName }) // Flask'a gönderilecek veri
-        })
-        .then(response => response.json())
-        .then(data => {
+        try {
+            const response = await fetch('http://127.0.0.1:5000/wanted_2', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ author_name: authorName }) // Flask'a gönderilecek veri
+            });
+            const data = await response.json();
+    
+            
             const result = data.priority_queue; // Flask'tan gelen öncelik kuyruğu sonucu
-        
+            
             let index = 0;
             
             // Çıktıları göstermek için bir fonksiyon
@@ -136,40 +138,84 @@ function setupButtonActions(graphData) {
             }
     
             displayNextItem(); // İlk öğeyi göster
-        })
-        .catch(error => {
+        } catch (error) {
             appendOutputMessage(`Error: ${error.message}`);
-        });
+        }
+    
+
+        // .then(response => response.json())
+        // .then(data => {
+        //     const result = data.priority_queue; // Flask'tan gelen öncelik kuyruğu sonucu
+        
+        //     let index = 0;
+            
+        //     // Çıktıları göstermek için bir fonksiyon
+        //     function displayNextItem() {
+        //         if (index < result.length) {
+        //             appendOutputMessage(result[index]); // Output mesajını ekle
+        //             index++;
+        //             setTimeout(displayNextItem, 200); // 0.5 saniye gecikme ile bir sonraki öğeyi göster
+        //         }
+        //     }
+    
+        //     displayNextItem(); // İlk öğeyi göster
+        // })
+        // .catch(error => {
+        //     appendOutputMessage(`Error: ${error.message}`);
+        // });
     };
     
+    function drawBST(nodeList, container, x, y, levelGap = 80, siblingGap = 50) {
+        if (nodeList.length === 0) return;
     
+        const div = document.createElement("div");
+        div.className = "node";
+        div.style.left = `${x}px`;
+        div.style.top = `${y}px`;
+        div.textContent = nodeList[0];
+        container.appendChild(div);
+    
+        const childY = y + levelGap;
+        const childX = x - siblingGap;
+    
+        if (nodeList.length > 1) {
+            drawBST(nodeList.slice(1), container, childX, childY, levelGap, siblingGap);
+        }
+    }
+
+    async function displayBST(result) {
+    
+        const treeContainer = document.getElementById("tree");
+        drawBST(result, treeContainer, window.innerWidth / 2, 20);
+    }
 
     // 3. Kuyruktan BST oluşturma
-    document.getElementById('button3').onclick = async() => {
+    document.getElementById('button3').onclick = async () => {
         const author = prompt("Yazarın adını giriniz:");
 
-    if (author) {
-        fetch('http://localhost:5000/wanted_3', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ author_name: author }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.error) {
-                alert(data.error);  // Show error if any
-            } else {
-                alert(`BST Durumu:\n${data.steps.join("\n")}`);
-                // Visualize or process the BST structure here
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Bir hata oluştu.');
-        });
-    }
+        if (author) {
+            fetch('http://localhost:5000/wanted_3', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ author_name: author }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);  // Show error if any
+                } else {
+                    alert(`BST Durumu:\n${data.data.join("\n")}`);
+                    // BST'yi görselleştirecek olan işlevi çağırıyoruz
+                    displayBST(result);  // Burada displayBST işlevini çağırıyoruz
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Bir hata oluştu.');
+            });
+        }
     };
 
     // 4. Kısa yolların hesaplanması

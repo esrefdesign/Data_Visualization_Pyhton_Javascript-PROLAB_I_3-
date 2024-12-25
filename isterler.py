@@ -1,5 +1,6 @@
 from priorityQueue import PriorityQueue
 from bstNode import BST
+import os
 class Wanted:
     def __init__(self,graph, authors, essays):
         self.authors = authors
@@ -46,7 +47,7 @@ class Wanted:
 
         return f"No path found between {author_A} and {author_B}."
 
-
+    
     def wanted_2(self,name):
         if name not in self.graph.adj_list:
             return f"Author {name} not found in the graph."
@@ -73,10 +74,15 @@ class Wanted:
             
         return result
    
+    def get_bst(bst):
+        # Örnek bir BST oluştur
 
+        bst_dict = bst.to_dict()
+        return 
+    
     def wanted_3(self, author_name):
         if author_name not in self.graph.adj_list:
-            return f"Author {author_name} not found in the graph."
+            return {"error": f"Author {author_name} not found in the graph."}
 
         # Initialize the priority queue and BST
         queue = PriorityQueue()
@@ -88,20 +94,15 @@ class Wanted:
             queue.heappush((-weight, collaborator))  # Push with negative weight to prioritize higher weights
             bst.insert(collaborator)  # Insert collaborator into BST
 
-        result = []
-        result.append(f"Starting with author {author_name}.")
-        result.append("Building the BST with co-authors:")
 
-        # Show the initial BST
-        result.append(f"BST before removing {author_name}: {bst.visualize()}")
+        # Extract priority queue contents
+        priority_queue_content = []
+        while not queue.is_empty():
+            _, collaborator = queue.heappop()
+            priority_queue_content.append(collaborator)
 
-        # Remove the specified author from the BST
-        bst.remove(author_name)
-
-        # Show the final BST after removal
-        result.append(f"BST after removing {author_name}: {bst.visualize()}")
-
-
+        # Return the result as a dictionary
+        result = priority_queue_content
         return result
 
     def wanted_4(self, author_name):

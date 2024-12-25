@@ -1,4 +1,5 @@
 
+
 class Node:
     def __init__(self, author, left=None, right=None):
         self.author = author
@@ -27,40 +28,23 @@ class BST:
             else:
                 self._insert(node.right, author)
 
-    def remove(self, author):
-        self.root = self._remove(self.root, author)
-
-    def _remove(self, node, author):
-        if node is None:
-            return node
-        if author < node.author:
-            node.left = self._remove(node.left, author)
-        elif author > node.author:
-            node.right = self._remove(node.right, author)
-        else:
-            # Node with one child or no child
-            if node.left is None:
-                return node.right
-            elif node.right is None:
-                return node.left
-
-            # Node with two children: Get the inorder successor (smallest in the right subtree)
-            min_node = self._min_value_node(node.right)
-            node.author = min_node.author
-            node.right = self._remove(node.right, min_node.author)
-        return node
-
-    def _min_value_node(self, node):
-        current = node
-        while current.left is not None:
-            current = current.left
-        return current
-
     def inorder(self):
         return self._inorder(self.root)
 
     def _inorder(self, node):
         return self._inorder(node.left) + [node.author] + self._inorder(node.right) if node else []
 
-    def visualize(self):
-        return self.inorder()
+    def get_edges(self):
+        """Return edges of the BST as a list of tuples."""
+        edges = []
+        self._get_edges(self.root, edges)
+        return edges
+
+    def _get_edges(self, node, edges):
+        if node:
+            if node.left:
+                edges.append((node.author, node.left.author))
+                self._get_edges(node.left, edges)
+            if node.right:
+                edges.append((node.author, node.right.author))
+                self._get_edges(node.right, edges)
