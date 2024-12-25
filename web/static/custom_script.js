@@ -46,6 +46,35 @@ function createSidebarButtons() {
     document.body.appendChild(sidebar);
 }
 
+// Çıktı ekranını oluşturacak bir işlev
+function createOutputScreen() {
+    const outputScreen = document.createElement('div');
+    outputScreen.id = 'outputScreen';
+    outputScreen.style.position = 'absolute';
+    outputScreen.style.top = '10%';
+    outputScreen.style.left = '10px';
+    outputScreen.style.width = '300px';
+    outputScreen.style.height = '80%';
+    outputScreen.style.overflowY = 'auto';
+    outputScreen.style.border = '1px solid #000';
+    outputScreen.style.padding = '10px';
+    outputScreen.style.backgroundColor = '#f9f9f9';
+    outputScreen.style.zIndex = '9999';
+
+    // Çıktı ekranını body'e ekle
+    document.body.appendChild(outputScreen);
+}
+
+// Çıktı ekranına mesaj ekleyen bir işlev
+function appendOutputMessage(message) {
+    const outputScreen = document.getElementById('outputScreen');
+    const messageElement = document.createElement('div');
+    messageElement.innerText = message;
+    messageElement.style.marginBottom = '10px';
+    outputScreen.appendChild(messageElement);
+    outputScreen.scrollTop = outputScreen.scrollHeight; // Kaydırma çubuğu her zaman en son mesaja gider
+}
+
 function setupButtonActions(graphData) {
     // 1. A ile B arasındaki en kısa yol
     document.getElementById('button1').onclick = () => {
@@ -65,48 +94,42 @@ function setupButtonActions(graphData) {
     };
 
     // 2. A ve işbirliği yaptığı yazarlar için düğüm ağırlıklarına göre kuyruk
-    document.getElementById('button2').onclick = () => {
-        const authorId = document.getElementById('authorIdInput').value; // Kullanıcıdan ID al
-        if (!authorId) {
-            alert("Lütfen bir yazar ID'si girin.");
+    document.getElementById('button2').onclick = async () => {
+        const authorName = prompt("A yazarının ID'sini giriniz:");
+        if (!authorName) {
+            alert("Lütfen bir yazar Name'si girin.");
             return;
         }
-    
-        fetch('/wanted_2', {
+
+        fetch('http://127.0.0.1:5000/wanted_2', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ author_id: authorId }) // Flask'a gönderilecek veri
+            body: JSON.stringify({ author_name: authorName }) // Flask'a gönderilecek veri
         })
         .then(response => response.json())
         .then(data => {
-            if (data.error) {
-                alert(`Hata: ${data.error}`);
-                return;
+            const result = data.priority_queue; // Flask'tan gelen öncelik kuyruğu sonucu
+        
+            let index = 0;
+            
+            // Çıktıları göstermek için bir fonksiyon
+            function displayNextItem() {
+                if (index < result.length) {
+                    appendOutputMessage(result[index]); // Output mesajını ekle
+                    index++;
+                    setTimeout(displayNextItem, 200); // 0.5 saniye gecikme ile bir sonraki öğeyi göster
+                }
             }
     
-            // Kuyruk işlemleri
-            const queue = [...data]; // Gelen veriyi kuyruğa aktar
-            const queueDiv = document.getElementById('queue');
-            queueDiv.innerHTML = ""; // Kuyruğu sıfırla
-    
-            queue.forEach((item, index) => {
-                setTimeout(() => {
-                    const element = document.createElement('div');
-                    element.innerText = `Yazar: ${item.name}, Ağırlık: ${item.weight}`;
-                    queueDiv.appendChild(element);
-                    if (index === queue.length - 1) {
-                        alert("Tüm kuyruk işlemleri tamamlandı!");
-                    }
-                }, index * 1000); // Kuyruk işlemleri arası 1 saniye gecikme
-            });
+            displayNextItem(); // İlk öğeyi göster
         })
         .catch(error => {
-            console.error('Hata:', error);
-            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+            appendOutputMessage(`Error: ${error.message}`);
         });
     };
+    
     
 
     // 3. Kuyruktan BST oluşturma
@@ -187,6 +210,7 @@ function setupButtonActions(graphData) {
 // Bu işlevi sayfa yüklenirken çağırın ve graphData'yı geçin
 window.onload = () => {
     createSidebarButtons();
+    createOutputScreen();
     const graphData = loadGraphData(); // Mevcut grafiği yükleyen bir işlev
     setupButtonActions(graphData);
 };

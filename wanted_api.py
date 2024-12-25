@@ -12,26 +12,13 @@ CORS(app)
 
 @app.route('/wanted_2', methods=['POST'])
 def wanted_2():
-    data = request.json
-    author_id = data.get('author_id')  # Kullanıcıdan alınan A yazarının ID'si
-    if not author_id:
+    data = request.json.get('author_name')  # Kullanıcıdan alınan A yazarının ID'si
+    if not data:
         return jsonify({"error": "Author ID is required"}), 400
-
-    # A yazarını bul ve işbirliği yaptığı yazarları listele
-    author = next((a for a in unique_authors.values() if a.ID == author_id), None)
-    if not author:
-        return jsonify({"error": "Author not found"}), 404
-
-    # İşbirliği yaptığı yazarlar ve düğüm ağırlıklarını hesapla
-    collaborators = []
-    for collaborator_name in graph.adj_list.get(author.name, []):
-        collaborator = unique_authors[collaborator_name]
-        weight = len(collaborator.essay)  # Makale sayısı düğüm ağırlığı olarak alınır
-        collaborators.append({"name": collaborator.name, "weight": weight})
-
-    # Düğüm ağırlıklarına göre sıralama
-    collaborators.sort(key=lambda x: x["weight"], reverse=True)
-    return jsonify(collaborators)
+    wanteds = Wanted(graph,unique_authors,unique_essasys)
+    result = wanteds.wanted_2(data)
+    return jsonify({"priority_queue":result}),200
+  
 
 @app.route('/wanted_5', methods=['POST'])
 
