@@ -34,7 +34,7 @@ def wanted_2():
     wanteds = Wanted(graph,unique_authors,unique_essasys)
     result = wanteds.wanted_2(data)
     return jsonify({"priority_queue":result}),200
-  
+
 @app.route('/wanted_3', methods=['POST'])
 def wanted_3():
     print("3. Endpoint'e giriş yapıldı.")
@@ -46,7 +46,7 @@ def wanted_3():
 
     wanteds = Wanted(graph, unique_authors, unique_essasys)
     result = wanteds.wanted_3(author_name)
-    return jsonify({"steps": result}), 200
+    return jsonify({"data": result,}), 200
 
 @app.route('/wanted_4', methods=['POST'])
 def wanted_4():

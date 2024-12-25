@@ -50,6 +50,8 @@ for _, row in data.iterrows():
             
             # Sadece ana yazar ile coauthor arasında bağlantı oluştur
             edge = tuple(sorted((author, coauthor)))
+        
+
             if edge not in edges:
                 edges.add(edge)
                 graph.add_edge(author, coauthor)
