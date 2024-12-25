@@ -8,7 +8,7 @@ from collections import defaultdict
 import webbrowser
 
 # Veriyi yükle
-data = pd.read_excel('DATASET.xlsx', nrows=100)
+data = pd.read_excel('DATASET.xlsx', nrows=400)
 # Pyvis ağı - Fizik ayarları optimize edildi
 g = Network(height="1500px", width="2000px", bgcolor='#444444', font_color='white', notebook=False)
 g.barnes_hut()
@@ -81,7 +81,10 @@ for author,author_obj in unique_authors.items():
 print(len(edges))
 
 for edge in edges:
-    g.add_edge(edge[0], edge[1], width=1)
+    weight = graph.get_edge_weight(edge[0], edge[1])
+    if(weight>1):
+        print(weight)  # Get the collaboration count (edge weight)
+    g.add_edge(edge[0], edge[1], width=weight, weight=weight)
 
 # HTML çıktısını oluştur ve tarayıcıda aç
 output_file = "web/static/fixed_graph.html"
