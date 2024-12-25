@@ -8,7 +8,7 @@ from collections import defaultdict
 import webbrowser
 
 # Veriyi yükle
-data = pd.read_excel('DATASET.xlsx', nrows=1000)
+data = pd.read_excel('DATASET.xlsx', nrows=100)
 # Pyvis ağı - Fizik ayarları optimize edildi
 g = Network(height="1500px", width="2000px", bgcolor='#444444', font_color='white', notebook=False)
 g.barnes_hut()
