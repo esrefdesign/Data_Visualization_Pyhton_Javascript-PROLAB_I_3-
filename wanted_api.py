@@ -10,8 +10,24 @@ app = Flask(__name__,
 
 CORS(app)
 
+@app.route('/wanted_1', methods=['POST'])
+def wanted_1():
+    print("1. Endpoint'e giriş yapıldı.")
+    data = request.json
+    author_A = data.get('author_A')
+    author_B = data.get('author_B')
+
+    if not author_A or not author_B:
+        return jsonify({"error": "Both author_A and author_B are required"}), 400
+
+    wanteds = Wanted(graph, unique_authors, unique_essasys)
+    result = wanteds.wanted_1(author_A, author_B)
+    return jsonify({"steps": result}), 200
+
 @app.route('/wanted_2', methods=['POST'])
 def wanted_2():
+    print("2. Endpoint'e giriş yapıldı.") 
+
     data = request.json.get('author_name')  # Kullanıcıdan alınan A yazarının ID'si
     if not data:
         return jsonify({"error": "Author ID is required"}), 400
@@ -19,11 +35,33 @@ def wanted_2():
     result = wanteds.wanted_2(data)
     return jsonify({"priority_queue":result}),200
   
+@app.route('/wanted_3', methods=['POST'])
+def wanted_3():
+    print("3. Endpoint'e giriş yapıldı.")
+    data = request.json
+    author_name = data.get('author_name')
+
+    if not author_name:
+        return jsonify({"error": "Author name is required"}), 400
+
+    wanteds = Wanted(graph, unique_authors, unique_essasys)
+    result = wanteds.wanted_3(author_name)
+    return jsonify({"steps": result}), 200
+
+@app.route('/wanted_4', methods=['POST'])
+def wanted_4():
+    print("4. Endpoint'e giriş yapıldı.")
+    author_name = request.json.get('author_name')  # Kullanıcıdan alınan A yazarının ID'si
+    if not author_name:
+        return jsonify({"error": "Author ID is required"}), 400
+    wanteds = Wanted(graph, unique_authors, unique_essasys)
+    result = wanteds.wanted_4(author_name)
+    return jsonify({"distance_table": result}), 200
 
 @app.route('/wanted_5', methods=['POST'])
 
 def wanted_5():
-    print("Endpoint'e giriş yapıldı.") 
+    print("5. Endpoint'e giriş yapıldı.") 
     author_name = request.json.get('author_name')
     if not author_name:
         return jsonify({"error": "author_name is required"}), 400  # Hatalı durum için
@@ -37,6 +75,17 @@ def wanted_6():
     print("6. enpoint")
     wanteds=Wanted(graph,unique_authors,unique_essasys)
     return jsonify(wanteds.wanted_6())
+
+@app.route('/wanted_7', methods=['POST'])
+def wanted_7():
+    print("7. Endpoint'e giriş yapıldı.")
+    author_name = request.json.get('author_name')  # Kullanıcıdan alınan A yazarının adı
+    if not author_name:
+        return jsonify({"error": "Author name is required"}), 400  # Yazar adı zorunlu
+
+    wanteds = Wanted(graph, unique_authors, unique_essasys)
+    result = wanteds.wanted_7(author_name)
+    return jsonify(result), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

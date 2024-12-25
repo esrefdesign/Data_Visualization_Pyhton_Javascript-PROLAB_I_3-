@@ -5,15 +5,13 @@ class Graph:
         self.adj_list = defaultdict(list)  # Bağlantı listesi
         self.node_degrees = defaultdict(int)  # Düğümlerin bağlantı sayıları
         self.edge_counts = defaultdict(int)
-        
+        self.edge_weights = defaultdict(lambda: defaultdict(int))
+
     def add_node(self, author):
         if author not in self.adj_list:
             self.adj_list[author] = []  # Boş bir liste ile düğümü ekle
             self.node_degrees[author] = 0
             
-
-    
-
 
     def add_edge(self, author1, author2):
         if author2 not in self.adj_list[author1]:
@@ -21,6 +19,9 @@ class Graph:
             self.adj_list[author2].append(author1)
             self.node_degrees[author1] += 1
             self.node_degrees[author2] += 1
+
+        self.edge_weights[author1][author2] += 1
+        self.edge_weights[author2][author1] += 1  # Karşılıklı işbirliği
 
     def get_max_connected_node(self):
         return max(self.node_degrees, key=self.node_degrees.get, default=None)
@@ -40,3 +41,6 @@ class Graph:
         return 1 + self.edge_counts[(author1, author2)] * 3  # Temel kalınlık + bağlantı sayısına göre artış
 
     
+    def get_edge_weight(self, author1, author2):
+        """İki yazar arasındaki işbirliği sayısını döndür."""
+        return self.edge_weights[author1].get(author2, 0)

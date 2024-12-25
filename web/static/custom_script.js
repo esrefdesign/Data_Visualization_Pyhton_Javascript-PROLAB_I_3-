@@ -77,19 +77,31 @@ function appendOutputMessage(message) {
 
 function setupButtonActions(graphData) {
     // 1. A ile B arasındaki en kısa yol
-    document.getElementById('button1').onclick = () => {
-        const authorA = prompt("A yazarının ID'sini giriniz:");
-        const authorB = prompt("B yazarının ID'sini giriniz:");
-        
+    document.getElementById('button1').onclick =async () => {
+        const authorA = prompt("A yazarının adını giriniz:");
+        const authorB = prompt("B yazarının adını giriniz:");
+    
         if (authorA && authorB) {
-            // En kısa yol algoritmasını çağır
-            const shortestPath = findShortestPath(graphData, authorA, authorB);
-            if (shortestPath) {
-                alert(`En kısa yol: ${shortestPath.join(" -> ")}`);
-                visualizePath(shortestPath); // Grafikte göster
-            } else {
-                alert("A ile B arasında bir yol bulunamadı.");
-            }
+            fetch('http://localhost:5000/wanted_1', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ author_A: authorA, author_B: authorB }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);  // Show error if any
+                } else {
+                    alert(`En kısa yol adımları: \n${data.steps}`);
+                    // Visualize or do further processing with the path steps
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Bir hata oluştu.');
+            });
         }
     };
 
@@ -133,21 +145,68 @@ function setupButtonActions(graphData) {
     
 
     // 3. Kuyruktan BST oluşturma
-    document.getElementById('button3').onclick = () => {
-        const authorA = prompt("A yazarının ID'sini giriniz:");
-        if (authorA) {
-            const bst = createBSTFromQueue(graphData, authorA);
-            visualizeBST(bst);
-        }
+    document.getElementById('button3').onclick = async() => {
+        const author = prompt("Yazarın adını giriniz:");
+
+    if (author) {
+        fetch('http://localhost:5000/wanted_3', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ author_name: author }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);  // Show error if any
+            } else {
+                alert(`BST Durumu:\n${data.steps.join("\n")}`);
+                // Visualize or process the BST structure here
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Bir hata oluştu.');
+        });
+    }
     };
 
     // 4. Kısa yolların hesaplanması
-    document.getElementById('button4').onclick = () => {
-        const authorA = prompt("A yazarının ID'sini giriniz:");
-        if (authorA) {
-            const shortestPaths = calculateAllShortestPaths(graphData, authorA);
-            visualizeTable(shortestPaths);
+    document.getElementById('button4').onclick = async () => {
+        const authorName = prompt("A yazarının ID'sini giriniz:");
+        if (!authorName) {
+            alert("Lütfen bir yazar Name'si girin.");
+            return;
         }
+
+        fetch('http://127.0.0.1:5000/wanted_4', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ author_name: authorName }) // Flask'a gönderilecek veri
+        })
+        .then(response => response.json())
+        .then(data => {
+            const distanceTable = data.distance_table; // Flask'tan gelen mesafe tablosu
+
+            let index = 0;
+            
+            // Çıktıları göstermek için bir fonksiyon
+            function displayNextItem() {
+                if (index < distanceTable.length) {
+                    appendOutputMessage(distanceTable[index]); // Output mesajını ekle
+                    index++;
+                    setTimeout(displayNextItem, 500); // 0.5 saniye gecikme ile bir sonraki öğeyi göster
+                }
+            }
+    
+            displayNextItem(); // İlk öğeyi göster
+        })
+        .catch(error => {
+            appendOutputMessage(`Error: ${error.message}`);
+        });
     };
 
     // 5. İşbirliği yaptığı yazar sayısının hesaplanması
@@ -196,13 +255,35 @@ function setupButtonActions(graphData) {
             alert('Bir hata oluştu. Lütfen tekrar deneyin.');
         });
     };
+
+
     // 7. En uzun yolun bulunması
-    document.getElementById('button7').onclick = () => {
-        const authorA = prompt("A yazarının ID'sini giriniz:");
+    document.getElementById('button7').onclick = async() => {
+        const authorA = prompt("A yazarının adını giriniz:");
         if (authorA) {
-            const longestPath = findLongestPath(graphData, authorA);
-            alert(`En uzun yol: ${longestPath.join(" -> ")}`);
-            visualizePath(longestPath);
+            // Send a POST request to the Flask server
+            fetch('http://localhost:5000/wanted_7', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ author_name: authorA }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Handle the response from the server
+                if (data.error) {
+                    alert(data.error);  // Show error if any
+                } else {
+                    const longestPath = data.longest_path;  // Extract the longest path
+                    alert(`En uzun yol: ${longestPath.join(" -> ")}`);  // Show the longest path
+                    visualizePath(longestPath);  // Call your function to visualize the path
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Bir hata oluştu.');
+            });
         }
     };
 }
@@ -367,7 +448,7 @@ function visualizeBST(bst) {
 }
 
 function visualizePath(path) {
-    alert(`Yol: ${path.join(" -> ")}`);
+    
 }
 
 function visualizeQueue(queue) {
