@@ -95,9 +95,7 @@
             height: 100%;
         }
         .node circle {
-            fill: #69b3a2;
-            stroke: #404040;
-            stroke-width: 1.5px;
+            fill: #6edfc4;
         }
         .node text {
             font-size: 20px;
@@ -114,6 +112,7 @@
 <body>
     <div class="container">
         <div id="sidebar">
+            <img id="bst-image" src="" alt="BST Visualization" style="display: none;">
             <div id="outputScreen"></div>
             <button id="clearOutput">Çıktıyı Temizle</button>
         </div>
@@ -197,7 +196,7 @@
 
                 // Düğüm çemberlerini çiz
                 node.append("circle")
-                    .attr("r", d => d.size / 2)
+                    .attr("r", d => d.size/1.2)
                     .attr("fill", d => colorScale(d.size)); // Renk skalasına göre renk ata
 
                 // Düğüm isimlerini çiz (çemberlerden sonra)
@@ -216,7 +215,7 @@
                         .distance(1600) // Kenar uzunluğunu artır
                     )
                     .force("charge", d3.forceManyBody().strength(-400)) // Çekim gücünü azalt
-                    .force("center", d3.forceCenter(width / 2, height / 2));
+                    .force("center", d3.forceCenter(width / 1.2, height / 1.2));
 
                 simulation.on("tick", () => {
                     link
@@ -295,7 +294,7 @@
                 if (data.error) {
                     appendOutputMessage(data.error);  // Show error if any
                 } else {
-                    appendOutputMessage(`En kısa yol adımları: \n${data.data}`);
+                    appendOutputMessage(`En kısa yol adımları: \n${data.data}->`);
                     highlightPath(data.data)// Further visualization of the path can be added here
                 }
             })
@@ -308,7 +307,7 @@
 
     // 2. Kuyruk Oluştur
     document.getElementById('button2').addEventListener('click', async () => {
-        const authorName = prompt("A yazarının ID'sini giriniz:");
+        const authorName = document.getElementById('input3').value;
         if (!authorName) {
             alert("Lütfen bir yazar Name'si girin.");
             return;
@@ -343,7 +342,7 @@
 
     // 3. Kuyruktan BST Oluştur
     document.getElementById('button3').addEventListener('click', async () => {
-        const author = prompt("Yazarın adını giriniz:");
+        const author = document.getElementById('input4').value;
 
         if (author) {
             fetch('http://localhost:5000/wanted_3', {
@@ -358,6 +357,12 @@
                 if (data.error) {
                     appendOutputMessage(data.error);  // Show error if any
                 } else {
+                    const imagePath = data.image;
+
+                    // Görseli yerleştir
+                    const imageElement = document.getElementById('bst-image');
+                    imageElement.src = imagePath;
+                    imageElement.style.display = 'block'; // Görünür hale getir
                     appendOutputMessage(`BST Durumu:\n${data.data.join("\n")}`);
                     // BST visualization can be added here, if needed
                 }
@@ -371,7 +376,7 @@
 
     // 4. Kısa Yollar
     document.getElementById('button4').addEventListener('click', async () => {
-        const authorName = prompt("A yazarının ID'sini giriniz:");
+        const authorName = document.getElementById('input5').value;
         if (!authorName) {
             alert("Lütfen bir yazar Name'si girin.");
             return;
@@ -397,7 +402,7 @@
                     setTimeout(displayNextItem, 2); // Display next item with delay
                 }
             }
-
+            
             displayNextItem(); // Start displaying items
         })
         .catch(error => {
@@ -407,7 +412,7 @@
 
     // 5. İşbirliği Yapan Yazar Sayısı
     document.getElementById('button5').addEventListener('click', async () => {
-        const authorA = prompt("A yazarının ID'sini giriniz:");
+        const authorA = document.getElementById('input6').value;
 
         if (authorA) {
             try {
@@ -426,7 +431,7 @@
                 }
 
                 const data = await response.json();
-                alert(`${authorA} yazarının toplam işbirliği yaptığı yazar sayısı: ${data.coauthor_count}`);
+                appendOutputMessage(`${authorA} yazarının toplam işbirliği yaptığı yazar sayısı: ${data.coauthor_count}`)
             } catch (error) {
                 console.error("Fetch hatası:", error);
                 alert("Bir hata oluştu. Lütfen bağlantınızı kontrol edin.");
@@ -444,7 +449,7 @@
         })
         .then(response => response.json())
         .then(data => {
-            alert(`En çok işbirliği yapan yazar: ${data.name}, İşbirlikçi sayısı: ${data.count}`);
+            appendOutputMessage(`En çok işbirliği yapan yazar: ${data.name}, İşbirlikçi sayısı: ${data.count}`)
         })
         .catch(error => {
             console.error('Hata:', error);
@@ -454,7 +459,7 @@
 
     // 7. En Uzun Yol
     document.getElementById('button7').addEventListener('click', async () => {
-        const authorA = prompt("A yazarının adını giriniz:");
+        const authorA = document.getElementById('input7').value;
 
         if (authorA) {
             fetch('/wanted_7', {

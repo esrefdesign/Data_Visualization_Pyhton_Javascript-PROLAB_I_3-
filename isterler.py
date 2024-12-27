@@ -101,17 +101,21 @@ class Wanted:
             queue.heappush((-weight, collaborator))  # Push with negative weight to prioritize higher weights
             bst.insert(collaborator)  # Insert collaborator into BST
 
-
         # Extract priority queue contents
         priority_queue_content = []
         while not queue.is_empty():
             _, collaborator = queue.heappop()
             priority_queue_content.append(collaborator)
 
-        # Return the result as a dictionary
-        result = priority_queue_content
-        return result
+        # Visualize the BST
+        
 
+        # Return the result as a dictionary
+        result = {
+            priority_queue_content: priority_queue_content,
+        }
+
+        return result
     def wanted_4(self, author_name):
         if author_name not in self.graph.adj_list:
             return f"Author {author_name} not found in the graph."
