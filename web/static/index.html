@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Graph Visualization</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body {
+            display: flex;
+            background-color: rgb(24, 24, 24);
+            margin: 0;
+            overflow: hidden;
+        }
+        .container {
+            display: flex;
+            width: 100%;
+        }
+        #buttonbar {
+            width: 300px;
+            position: relative;
+            top: 15%;
+            right: 5px;
+            color: white;
+            padding: 10px;
+            height: 400px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0; /* Adjust vertical margins */
+            box-sizing: border-box;
+            border: 2px solid #ccc;
+            border-radius: 5px; /* Rounded corners for inputs */
+            background-color: #444; /* Darker background for inputs */
+            color: white;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #69b3a2; /* Highlight border on focus */
+            box-shadow: 0 0 5px rgba(105, 179, 162, 0.5); /* Add a subtle shadow on focus */
+        }                     
+        #sidebar {
+            width: 300px;
+            background-color: #2f2f2f;
+            color: white;
+            padding: 5px;
+            overflow-y: auto;
+            height: 100vh;
+        }
+        #outputScreen {
+            color: white;
+            background-color: #333;
+            padding: 20px;
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        #clearOutput { /* Yeni buton için stil */
+            background-color: #d9534f; /* Kırmızımsı bir renk */
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            width: fit-content; /* içeriğe göre genişlik */
+            align-self: center; /* yatay ortalama */
+            transition: background-color 0.3s ease;
+        }
+
+        #clearOutput:hover {
+            background-color: #c9302c;
+        }
+        button {
+            background-color: #69b3a2;
+            border: none;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #497e6a;
+        }
+        #graphContainer {
+            flex: 1;
+            height: 100vh;
+        }
+        svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+        .node circle {
+            fill: #69b3a2;
+            stroke: #404040;
+            stroke-width: 1.5px;
+        }
+        .node text {
+            font-size: 20px;
+            font-family: Arial, sans-serif;
+            pointer-events: none;
+            color: aliceblue;
+        }
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="sidebar">
+            <div id="outputScreen"></div>
+            <button id="clearOutput">Çıktıyı Temizle</button>
+        </div>
+
+        <div id="graphContainer">
+            <svg></svg>
+        </div>
+        <div id="buttonbar">
+            <button id="button1">En Kısa Yol</button>
+            <input type="text" id="input1" placeholder="A Yazarı ID">
+            <input type="text" id="input2" placeholder="B Yazarı ID">
+            <button id="button2">Kuyruk Oluştur</button>
+            <input type="text" id="input3" placeholder="A Yazarı ID">
+            <button id="button3">BST Oluştur</button>
+            <input type="text" id="input4" placeholder="A Yazarı ID">
+            <button id="button4">Kısa Yollar</button>
+            <input type="text" id="input5" placeholder="A Yazarı ID">
+            <button id="button5">İşbirliği Yazar Sayısı</button>
+            <input type="text" id="input6" placeholder="A Yazarı ID">
+            <button id="button6">En Çok İşbirliği Yapan Yazar</button>
+            <button id="button7">En Uzun Yol</button>
+            <input type="text" id="input7" placeholder="A Yazarı ID">
+        </div>
+    </div>
+
+    <script>
+        const width = window.innerWidth - 300; // Adjust width for sidebar
+        const height = window.innerHeight;
+
+        const svg = d3.select("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const zoomGroup = svg.append("g");
+
+        const zoom = d3.zoom()
+            .scaleExtent([0.01, 100])
+            .on("zoom", (event) => {
+                zoomGroup.attr("transform", event.transform);
+            });
+
+        svg.call(zoom);
+
+        fetch('/get_graph')
+            .then(response => response.json())
+            .then(data => {
+                const nodes = data.nodes;
+                const links = data.edges;
+
+                // Node boyutlarına göre minimum ve maksimum değerleri bul
+                const minNodeSize = d3.min(nodes, d => d.size);
+                const maxNodeSize = d3.max(nodes, d => d.size);
+
+                // Renk skalası (açık mavi -> koyu mavi)
+                const colorScale = d3.scaleLinear()
+                    .domain([minNodeSize, maxNodeSize])
+                    .range(["#add8e6", "#7913ac"]); // Açık mavi -> Koyu mavi
+
+                // Yazı boyutu skalası
+                const textSizeScale = d3.scaleLinear()
+                    .domain([minNodeSize, maxNodeSize])
+                    .range([10, 60]); // 10px -> 20px arası
+
+                // Bağlantıları çiz
+                const link = zoomGroup.append("g")
+                    .attr("class", "links")
+                    .selectAll("line")
+                    .data(links)
+                    .enter()
+                    .append("line")
+                    .attr("class", "link")
+                    .style("stroke-width", 5);
+
+                // Düğümleri çiz
+                const node = zoomGroup.append("g")
+                    .attr("class", "nodes")
+                    .selectAll("g")
+                    .data(nodes)
+                    .enter()
+                    .append("g");
+
+                // Düğüm çemberlerini çiz
+                node.append("circle")
+                    .attr("r", d => d.size / 2)
+                    .attr("fill", d => colorScale(d.size)); // Renk skalasına göre renk ata
+
+                // Düğüm isimlerini çiz (çemberlerden sonra)
+                node.append("text")
+                    .attr("x", 12)
+                    .attr("y", 10)
+                    .text(d => d.name)
+                    .style("font-size", d => `${textSizeScale(d.size)}px`) // Yazı boyutunu boyuta göre ayarla
+                    .style("font-family", "Arial")
+                    .style("fill", "aqua")
+                    .style("pointer-events", "none"); // Yazılara tıklamayı engeller
+                    
+                const simulation = d3.forceSimulation(nodes)
+                    .force("link", d3.forceLink(links)
+                        .id(d => d.name)
+                        .distance(1600) // Kenar uzunluğunu artır
+                    )
+                    .force("charge", d3.forceManyBody().strength(-400)) // Çekim gücünü azalt
+                    .force("center", d3.forceCenter(width / 2, height / 2));
+
+                simulation.on("tick", () => {
+                    link
+                        .attr("x1", d => d.source.x)
+                        .attr("y1", d => d.source.y)
+                        .attr("x2", d => d.target.x)
+                        .attr("y2", d => d.target.y);
+
+                    node
+                        .attr("transform", d => `translate(${d.x}, ${d.y})`);
+                });
+            });
+
+        window.addEventListener("resize", () => {
+            const newWidth = window.innerWidth - 300; // Adjust width for sidebar
+            const newHeight = window.innerHeight;
+            svg.attr("width", newWidth).attr("height", newHeight);
+        });
+
+        function setupButtonActions() {
+    // Function to append output messages to the output screen
+    function appendOutputMessage(message) {
+        const outputScreen = document.getElementById("outputScreen");
+        const p = document.createElement("p");
+        p.textContent = message;
+        outputScreen.appendChild(p);
+        }
+    function highlightPath(path) {
+        // Önce tüm kenar ve düğümleri varsayılan renklerine döndür
+        svg.selectAll(".link").style("stroke", "#999").style("stroke-opacity", 0.6);
+        svg.selectAll(".node circle").attr("fill", d => colorScale(d.size)); // Varsayılan düğüm rengi
+
+        if (!path || path.length < 2) return; // Geçerli bir yol yoksa çık
+
+        // Yoldaki düğümleri vurgula
+        svg.selectAll(".node")
+            .filter(d => path.includes(d.name)) // Düğümün yolda olup olmadığını kontrol et
+            .select("circle")
+            .attr("fill", "red"); // Vurgu rengi
+
+        // Yoldaki kenarları vurgula
+        for (let i = 0; i < path.length - 1; i++) {
+            const sourceName = path[i];
+            const targetName = path[i + 1];
+
+            svg.selectAll(".link")
+                .filter(function(d) {
+                    return (d.source.name === sourceName && d.target.name === targetName) ||
+                           (d.source.name === targetName && d.target.name === sourceName); // Yönlü olmayan grafikler için
+                })
+                .style("stroke", "red") // Vurgu rengi
+                .style("stroke-opacity", 1); // Opaklığı artır
+        }
+    }
+
+
+    document.getElementById("clearOutput").addEventListener("click", () => {
+                outputScreen.innerHTML = ""; // Çıktı ekranını temizle
+            });
+
+    // 1. En Kısa Yol
+    document.getElementById('button1').addEventListener('click', async () => {
+        const authorA = document.getElementById('input1').value;
+        const authorB = document.getElementById('input2').value;
+
+        if (authorA && authorB) {
+            fetch('http://127.0.0.1:5000/wanted_1', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ author_A: authorA, author_B: authorB }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    appendOutputMessage(data.error);  // Show error if any
+                } else {
+                    appendOutputMessage(`En kısa yol adımları: \n${data.data}`);
+                    highlightPath(data.data)// Further visualization of the path can be added here
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                appendOutputMessage('Bir hata oluştu.');
+            });
+        }
+    });
+
+    // 2. Kuyruk Oluştur
+    document.getElementById('button2').addEventListener('click', async () => {
+        const authorName = prompt("A yazarının ID'sini giriniz:");
+        if (!authorName) {
+            alert("Lütfen bir yazar Name'si girin.");
+            return;
+        }
+
+        try {
+            const response = await fetch('http://127.0.0.1:5000/wanted_2', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ author_name: authorName })
+            });
+            const data = await response.json();
+            const result = data.priority_queue; // Priority queue from Flask response
+
+            let index = 0;
+
+            function displayNextItem() {
+                if (index < result.length) {
+                    appendOutputMessage(result[index]);
+                    index++;
+                    setTimeout(displayNextItem, 2); // Display next item with delay
+                }
+            }
+
+            displayNextItem(); // Start displaying items
+        } catch (error) {
+            appendOutputMessage(`Error: ${error.message}`);
+        }
+    });
+
+    // 3. Kuyruktan BST Oluştur
+    document.getElementById('button3').addEventListener('click', async () => {
+        const author = prompt("Yazarın adını giriniz:");
+
+        if (author) {
+            fetch('http://localhost:5000/wanted_3', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ author_name: author }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    appendOutputMessage(data.error);  // Show error if any
+                } else {
+                    appendOutputMessage(`BST Durumu:\n${data.data.join("\n")}`);
+                    // BST visualization can be added here, if needed
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                appendOutputMessage('Bir hata oluştu.');
+            });
+        }
+    });
+
+    // 4. Kısa Yollar
+    document.getElementById('button4').addEventListener('click', async () => {
+        const authorName = prompt("A yazarının ID'sini giriniz:");
+        if (!authorName) {
+            alert("Lütfen bir yazar Name'si girin.");
+            return;
+        }
+
+        fetch('http://127.0.0.1:5000/wanted_4', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ author_name: authorName })
+        })
+        .then(response => response.json())
+        .then(data => {
+            const distanceTable = data.distance_table; // Distance table from Flask
+
+            let index = 0;
+
+            function displayNextItem() {
+                if (index < distanceTable.length) {
+                    appendOutputMessage(distanceTable[index]);
+                    index++;
+                    setTimeout(displayNextItem, 2); // Display next item with delay
+                }
+            }
+
+            displayNextItem(); // Start displaying items
+        })
+        .catch(error => {
+            appendOutputMessage(`Error: ${error.message}`);
+        });
+    });
+
+    // 5. İşbirliği Yapan Yazar Sayısı
+    document.getElementById('button5').addEventListener('click', async () => {
+        const authorA = prompt("A yazarının ID'sini giriniz:");
+
+        if (authorA) {
+            try {
+                const response = await fetch("http://127.0.0.1:5000/wanted_5", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ author_name: authorA })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    alert(`Hata: ${errorData.error || "Bilinmeyen bir hata oluştu."}`);
+                    return;
+                }
+
+                const data = await response.json();
+                alert(`${authorA} yazarının toplam işbirliği yaptığı yazar sayısı: ${data.coauthor_count}`);
+            } catch (error) {
+                console.error("Fetch hatası:", error);
+                alert("Bir hata oluştu. Lütfen bağlantınızı kontrol edin.");
+            }
+        }
+    });
+
+    // 6. En Çok İşbirliği Yapan Yazar
+    document.getElementById('button6').addEventListener('click', () => {
+        fetch('http://127.0.0.1:5000/wanted_6', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert(`En çok işbirliği yapan yazar: ${data.name}, İşbirlikçi sayısı: ${data.count}`);
+        })
+        .catch(error => {
+            console.error('Hata:', error);
+            alert('Bir hata oluştu. Lütfen tekrar deneyin.');
+        });
+    });
+
+    // 7. En Uzun Yol
+    document.getElementById('button7').addEventListener('click', async () => {
+        const authorA = prompt("A yazarının adını giriniz:");
+
+        if (authorA) {
+            fetch('/wanted_7', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ author_name: authorA }),
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    appendOutputMessage(data.error);  // Show error if any
+                } else {
+                    const longestPath = data.longest_path;
+                    appendOutputMessage(`En uzun yol: ${longestPath.join(" -> ")}`);
+                    // Visualize path function can be added here
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                appendOutputMessage('Bir hata oluştu.');
+            });
+        }
+    });
+}
+
+// This function will be called when the page is loaded
+window.onload = () => {
+   // Load the existing graph data
+    setupButtonActions(); // Set up button actions with the graph data
+};
+
+    </script>
+</body>
+</html>

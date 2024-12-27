@@ -95,6 +95,7 @@ function setupButtonActions(graphData) {
                     alert(data.error);  // Show error if any
                 } else {
                     alert(`En kısa yol adımları: \n${data.steps}`);
+                    
                     // Visualize or do further processing with the path steps
                 }
             })

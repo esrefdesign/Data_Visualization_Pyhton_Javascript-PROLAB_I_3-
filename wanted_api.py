@@ -1,14 +1,38 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify,render_template
 from main import unique_authors, unique_essasys,graph
 from isterler import Wanted
 from flask_cors import CORS
+
 app = Flask(__name__, 
             static_url_path="",
-            static_folder="web"
+            static_folder="web",
             )
 # Flask route for wanted_5 function
 
 CORS(app)
+
+@app.route('/get_graph',methods=['GET'])
+def get_graph():
+     # Nodes ve Edges dizileri
+    nodes = [
+        {
+            "name": author,
+            "size": graph.get_node_size(author),
+        }
+        for author in graph.adj_list.keys()
+    ]
+    edges = [
+        {
+            "source": author1,
+            "target": author2,
+        }
+        for author1 in graph.adj_list
+        for author2 in graph.adj_list[author1]
+        if author1 < author2  # Kenarları çift yazmamak için
+    ]
+
+    # JSON olarak döndür
+    return jsonify({"nodes": nodes, "edges": edges})
 
 @app.route('/wanted_1', methods=['POST'])
 def wanted_1():
@@ -22,7 +46,7 @@ def wanted_1():
 
     wanteds = Wanted(graph, unique_authors, unique_essasys)
     result = wanteds.wanted_1(author_A, author_B)
-    return jsonify({"steps": result}), 200
+    return jsonify({"data": result}), 200
 
 @app.route('/wanted_2', methods=['POST'])
 def wanted_2():
