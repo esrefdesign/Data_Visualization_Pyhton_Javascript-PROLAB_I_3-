@@ -24,28 +24,35 @@ class Wanted:
         while not queue.is_empty():
             current_distance, current_author = queue.heappop()
 
+            # If the node is already visited, skip it
+            if current_author in visited:
+                continue
+
+            # Mark the node as visited
+            visited.add(current_author)
+
             # If we reached the destination author B, reconstruct the path
             if current_author == author_B:
                 path = []
                 while current_author is not None:
                     path.insert(0, current_author)
                     current_author = previous_node[current_author]
-                result.append(f"Found the shortest path: {' -> '.join(path)}")
-                return result
+                return path
 
             # Explore the neighbors of the current author
             for neighbor in self.graph.adj_list.get(current_author, []):
-                if neighbor not in visited:
-                    visited.add(neighbor)
-                    edge_weight = self.graph.get_edge_weight(current_author, neighbor)
-                    new_distance = current_distance + edge_weight  # Add the edge weight to the current distance
+                edge_weight = self.graph.get_edge_weight(current_author, neighbor)
+                new_distance = current_distance + edge_weight
+
+                # Update the distance table and enqueue the neighbor if necessary
+                if neighbor not in visited and (neighbor not in distance_table or new_distance < distance_table[neighbor]):
                     distance_table[neighbor] = new_distance
                     previous_node[neighbor] = current_author
                     queue.heappush((new_distance, neighbor))  # Add the neighbor with the new distance to the queue
 
-                    result.append(f"Added {neighbor} to the queue with distance {new_distance}.")
 
         return f"No path found between {author_A} and {author_B}."
+
 
     
     def wanted_2(self,name):

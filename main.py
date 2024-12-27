@@ -8,10 +8,10 @@ from collections import defaultdict
 import webbrowser
 
 # Veriyi yükle
-data = pd.read_excel('DATASET.xlsx', nrows=400)
+data = pd.read_excel('DATASET.xlsx', nrows=1000)
 # Pyvis ağı - Fizik ayarları optimize edildi
-g = Network(height="1500px", width="2000px", bgcolor='#444444', font_color='white', notebook=False)
-g.barnes_hut()
+# g = Network(height="1500px", width="2000px", bgcolor='#444444', font_color='white', notebook=False)
+# g.barnes_hut()
 
 # Graph nesnesi
 graph = Graph()
@@ -58,73 +58,34 @@ for _, row in data.iterrows():
         
 
 # Pyvis ağına düğümleri ekle
-for author,author_obj in unique_authors.items():
-    size = min(20 + 2*len(graph.adj_list[author]), 150)  # Bağlantı sayısına göre boyut
-    color = '#00aaff' if len(graph.adj_list[author]) > 5 else '#7777ff'
-    essays = [f"{essay.title} (ID: {essay.ID})" for essay in author_obj.essay]  # Makale bilgilerini al
-    essays_text = "\n".join(essays) if essays else "No essays available"
+# for author,author_obj in unique_authors.items():
+#     size = min(20 + 2*len(graph.adj_list[author]), 150)  # Bağlantı sayısına göre boyut
+#     color = '#00aaff' if len(graph.adj_list[author]) > 5 else '#7777ff'
+#     essays = [f"{essay.title} (ID: {essay.ID})" for essay in author_obj.essay]  # Makale bilgilerini al
+#     essays_text = "\n".join(essays) if essays else "No essays available"
 
-    title = f"""
-    {author}
-    Connections:{len(graph.adj_list[author])}
-    Essays:{essays_text}
-    """ if len(graph.adj_list[author])!=1 else f"""
-    {author}
-    Connections:{graph.adj_list[author]}
-    Essays:{essays_text}
-    """
+#     title = f"""
+#     {author}
+#     Connections:{len(graph.adj_list[author])}
+#     Essays:{essays_text}
+#     """ if len(graph.adj_list[author])!=1 else f"""
+#     {author}
+#     Connections:{graph.adj_list[author]}
+#     Essays:{essays_text}
+#     """
    
    
-    g.add_node(author, label=author,title=title, size=size, color=color)
+#     g.add_node(author, label=author,title=title, size=size, color=color)
 
-# Pyvis ağına kenarları ekle
-
-
-print(len(edges))
-
-for edge in edges:
-    weight = graph.get_edge_weight(edge[0], edge[1])
-    if(weight>1):
-        print(weight)  # Get the collaboration count (edge weight)
-    g.add_edge(edge[0], edge[1], width=weight, weight=weight)
-
-# HTML çıktısını oluştur ve tarayıcıda aç
-output_file = "web/static/fixed_graph.html"
+# # Pyvis ağına kenarları ekle
 
 
-g.set_options("""
-var options = {
-  "physics": {
-    "enabled": true,
-    "solver": "forceAtlas2Based",
-    "forceAtlas2Based": {
-      "gravitationalConstant": -50,
-      "centralGravity": 0.01,
-      "springLength": 50,
-      "springConstant": 0.02
-    },
-    "maxVelocity": 50,
-    "minVelocity": 0.1
-  }
-}
-""")
+# print(len(edges))
 
-
-g.write_html(output_file)
-
-
-js_link = '<script src="/static/custom_script.js"></script>'
-
-# HTML dosyasını düzenle
-with open(output_file, "r", encoding="utf-8") as file:
-    html_content = file.read()
-
-# </head>'den önce JavaScript dosyasını ekleyin
-if js_link not in html_content:  # Aynı script eklenmesin diye kontrol
-    html_content = html_content.replace("</head>", f"{js_link}\n</head>")
-
-# Düzenlenmiş HTML'yi geri yaz
-with open(output_file, "w", encoding="utf-8") as file:
-    file.write(html_content)
+# for edge in edges:
+#     weight = graph.get_edge_weight(edge[0], edge[1])
+#     if(weight>1):
+#         print(weight)  # Get the collaboration count (edge weight)
+#     g.add_edge(edge[0], edge[1], width=weight, weight=weight)
 
 
