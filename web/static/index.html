@@ -482,6 +482,7 @@
                 } else {
                     const longestPath = data.longest_path;
                     appendOutputMessage(`En uzun yol: ${longestPath.join(" -> ")}`);
+                    highlightPath(longestPath);
                     // Visualize path function can be added here
                 }
             })
