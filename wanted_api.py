@@ -70,7 +70,7 @@ def wanted_3():
 
     wanteds = Wanted(graph, unique_authors, unique_essasys)
     result = wanteds.wanted_3(author_name)
-    return jsonify({"data": result,}), 200
+    return jsonify(result), 200
 
 @app.route('/wanted_4', methods=['POST'])
 def wanted_4():
