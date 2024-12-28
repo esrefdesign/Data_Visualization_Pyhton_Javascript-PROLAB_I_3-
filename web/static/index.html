@@ -100,7 +100,7 @@
         .node text {
             font-size: 20px;
             font-family: Arial, sans-serif;
-            pointer-events: none;
+            pointer-events: all;
             color: aliceblue;
         }
         .link {
@@ -207,7 +207,7 @@
                     .style("font-size", d => `${textSizeScale(d.size)}px`) // Yazı boyutunu boyuta göre ayarla
                     .style("font-family", "Arial")
                     .style("fill", "aqua")
-                    .style("pointer-events", "none"); // Yazılara tıklamayı engeller
+                    .style("pointer-events", "all"); // Yazılara tıklamayı engeller
                     
                 const simulation = d3.forceSimulation(nodes)
                     .force("link", d3.forceLink(links)
@@ -357,14 +357,20 @@
                 if (data.error) {
                     appendOutputMessage(data.error);  // Show error if any
                 } else {
-                    const imagePath = data.image;
+                    const imagePath = data.bst ; 
+                   
+                appendOutputMessage(`BST Durumu:\n${data.bst}`);
+                
+                // Görseli HTML sayfasında göstermek için bir <img> etiketi ekleyelim
+                const imageElement = document.createElement('img');
+                imageElement.src = "bst_visualization.png";  // Görsel yolunu belirliyoruz
+                imageElement.alt = 'BST Görseli';  // Görsel için alternatif metin
+                imageElement.style.maxWidth = '100%';  // Görsel boyutunu ayarlamak
+                imageElement.style.height = 'auto';  // Yüksekliği otomatik yapmak
 
-                    // Görseli yerleştir
-                    const imageElement = document.getElementById('bst-image');
-                    imageElement.src = imagePath;
-                    imageElement.style.display = 'block'; // Görünür hale getir
-                    appendOutputMessage(`BST Durumu:\n${data.data.join("\n")}`);
-                    // BST visualization can be added here, if needed
+                // Görseli sayfada bir div'e ekliyoruz
+                const outputDiv = document.getElementById('outputScreen');
+                outputDiv.appendChild(imageElement);
                 }
             })
             .catch(error => {

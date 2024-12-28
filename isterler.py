@@ -81,11 +81,7 @@ class Wanted:
             
         return result
    
-    def get_bst(bst):
-        # Örnek bir BST oluştur
 
-        bst_dict = bst.to_dict()
-        return 
     
     def wanted_3(self, author_name):
         if author_name not in self.graph.adj_list:
@@ -106,13 +102,16 @@ class Wanted:
         while not queue.is_empty():
             _, collaborator = queue.heappop()
             priority_queue_content.append(collaborator)
-
+  
         # Visualize the BST
-        
+        bst.build_from_graph(self.graph, author_name)  # Başlangıç yazarı "Alice"
+        # BST'yi görselleştir ve dosya yolunu al
+        filename = bst.visualize()
 
         # Return the result as a dictionary
         result = {
-            priority_queue_content: priority_queue_content,
+            "queue": priority_queue_content,
+            "bst": filename,
         }
 
         return result

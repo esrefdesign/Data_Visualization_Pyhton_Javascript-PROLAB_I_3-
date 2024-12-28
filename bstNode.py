@@ -9,7 +9,7 @@ class Node:
 class BST:
     def __init__(self):
         self.root = None
-
+        self.graph= None
     def insert(self, author):
         if self.root is None:
             self.root = Node(author)
@@ -49,34 +49,41 @@ class BST:
                 edges.append((node.author, node.right.author))
                 self._get_edges(node.right, edges)
 
-    def visualize(self, filename="graph.png"):
-        # NetworkX grafiğini oluştur
-        G = nx.Graph()
+    def build_from_graph(self, graph, start_author):
+        """
+        Grafikten yazarları alıp dengeli bir BST oluşturur.
+        """
+        visited = set()
+        queue = [start_author]
         
-        # Düğümleri ve kenarları ekle
-        for node, neighbors in self.adj_list.items():
-            G.add_node(node)
-            for neighbor in neighbors:
-                G.add_edge(node, neighbor)
+        while queue:
+            author = queue.pop(0)
+            if author not in visited:
+                self.insert(author)
+                visited.add(author)
+                queue.extend(graph.adj_list.get(author, []))
 
-        # Düğümleri yerleştirmek için bir düzen kullan
-        pos = nx.spring_layout(G)
+    def visualize(self, filename="web/static/bst_visualization.png"):
+        """
+        BST'yi bir grafik olarak görselleştirir ve kaydeder.
+        """
+        if not self.root:
+            raise ValueError("Ağaç boş, görselleştirilecek düğüm yok.")
 
-        # Düğümleri çiz (renkler ve boyutlar dinamik olabilir)
-        node_colors = [self.get_node_color(node) for node in G.nodes()]
-        node_sizes = [self.get_node_size(node) for node in G.nodes()]
+        # NetworkX grafiğini oluştur
+        G = nx.DiGraph()
+        edges = self.get_edges()
+        G.add_edges_from(edges)
 
-        nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=node_sizes)
+        # Düğümleri yerleştirmek için düzen
+        pos = nx.spring_layout(G) # 'dot' düzenini kullan
 
-        # Kenarları çiz (kalınlıklar dinamik olabilir)
-        edge_widths = [self.get_edge_weight(u, v) for u, v in G.edges()]
-        nx.draw_networkx_edges(G, pos, width=edge_widths)
-
-        # Düğüm etiketlerini çiz
-        nx.draw_networkx_labels(G, pos)
-
-        # Grafik ayarları ve kaydetme
-        plt.title("Graph Visualization")
-        plt.axis("off")
-        plt.savefig(filename, format="PNG")
+        # Düğümleri ve kenarları çiz
+        plt.figure(figsize=(10, 10))
+        nx.draw(G, pos, with_labels=True, arrows=False, node_size=2000, node_color="lightblue", font_size=10)
+        
+        # Başlık ve kaydetme
+        plt.title("Balanced BST Visualization")
+        plt.savefig(filename, format="PNG", bbox_inches="tight")
         plt.close()
+        return filename

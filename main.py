@@ -1,11 +1,9 @@
 import pandas as pd
 from author_node import Author
 from essay_node import Essay
-from pyvis.network import Network
 from graph import Graph
 from isterler import Wanted
 from collections import defaultdict
-import webbrowser
 
 # Veriyi yükle
 data = pd.read_excel('DATASET.xlsx', nrows=1000)
