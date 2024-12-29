@@ -4,11 +4,17 @@ A Data Analsys Project About Authors Connections Graph visualization.
 There are 1000 essay in excel table init orcid,doi,author_name,couathors,paper_title columns
 
 -------------------------------------------
+
 orcid: Author's Unique ID
+
 doi: Essay's Unique ID
+
 author_name: The main Author's name of essay
+
 coauthors: the co-authors of essay
+
 paper_title: Essay's Name
+
 -------------------------------------------
 
 
