@@ -73,6 +73,48 @@
         #clearOutput:hover {
             background-color: #c9302c;
         }
+
+                /* Pop-up Arka Planı */
+        .popup {
+            position: absolute; /* Pop-up, tıklanan noktanın yakınında açılacak */
+            display: none; /* Varsayılan olarak gizli */
+            z-index: 1000;
+        }
+
+        /* Pop-up İçerik Alanı */
+        .popup-content {
+            position: relative;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px; /* İsteğe bağlı: Genişlik sınırı */
+            max-height: 50vh; /* Maksimum yüksekliği belirler */
+            overflow-y: auto; /* Yüksekliği aşarsa kaydırılabilir yapar */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Kapatma Butonu */
+        .close-btn {
+            position: relative;
+            top: 2px;
+            right: 10px;
+            background: red;
+            border: none;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        /* Kaydırma Çubuğu Stili (Opsiyonel) */
+        .popup-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .popup-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        .popup-content::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
         button {
             background-color: #69b3a2;
             border: none;
@@ -137,8 +179,18 @@
             <input type="text" id="input7" placeholder="A Yazarı ID">
         </div>
     </div>
-
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <button id="popup-close" class="close-btn">×</button>
+            <h2 id="author-name">Author Name</h2>
+            <p><strong>ORCID:</strong> <span id="author-orcid"></span></p>
+            <h3>Articles:</h3>
+            <ul id="author-articles"></ul>
+        </div>
+    </div>
+    
     <script>
+        let nodes=[]
         const width = window.innerWidth - 300; // Adjust width for sidebar
         const height = window.innerHeight;
 
@@ -159,9 +211,9 @@
         fetch('/get_graph')
             .then(response => response.json())
             .then(data => {
-                const nodes = data.nodes;
+                nodes = data.nodes;
                 const links = data.edges;
-
+                
                 // Node boyutlarına göre minimum ve maksimum değerleri bul
                 const minNodeSize = d3.min(nodes, d => d.size);
                 const maxNodeSize = d3.max(nodes, d => d.size);
@@ -197,8 +249,10 @@
                 // Düğüm çemberlerini çiz
                 node.append("circle")
                     .attr("r", d => d.size/1.2)
-                    .attr("fill", d => colorScale(d.size)); // Renk skalasına göre renk ata
-
+                    .attr("fill", d => colorScale(d.size)) // Renk skalasına göre renk ata
+                    .on("click", (event, d) => {
+                        showPopup(event, d); // Popup göster
+                     });
                 // Düğüm isimlerini çiz (çemberlerden sonra)
                 node.append("text")
                     .attr("x", 12)
@@ -234,16 +288,51 @@
             const newHeight = window.innerHeight;
             svg.attr("width", newWidth).attr("height", newHeight);
         });
+        
+        function getAuthorNameById(authorId) {
+            const author = nodes.find(node => node.id === authorId);
+            if (author) {
+                return author.name;
+            } else {
+                return null; // Eğer ID bulunamazsa null döner
+            }
+        }
+        function showPopup(event, nodeData) {
+            const popup = document.getElementById("popup");
+                
+            // Yazar bilgilerini doldur
+            document.getElementById("author-name").textContent = nodeData.name;
+            document.getElementById("author-orcid").textContent = nodeData.id || "N/A";
+            const articlesList = document.getElementById("author-articles");
+            articlesList.innerHTML = ""; // Önceki listeyi temizle
+            (nodeData.essay || []).forEach(article => {
+                const li = document.createElement("li");
+                li.textContent = article;
+                articlesList.appendChild(li);
+            });
+        
+            // Pop-up'ın konumunu belirle
+            popup.style.left = `${event.pageX}px`;
+            popup.style.top = `${event.pageY}px`;
+            popup.style.display = "block"; // Pop-up'ı görünür yap
+        }
+
+        // Pop-up'ı kapatma butonu
+        document.getElementById("popup-close").addEventListener("click", () => {
+            document.getElementById("popup").style.display = "none";
+        });
+
 
         function setupButtonActions() {
-    // Function to append output messages to the output screen
-    function appendOutputMessage(message) {
+             // Function to append output messages to the output screen
+            function appendOutputMessage(message) {
         const outputScreen = document.getElementById("outputScreen");
         const p = document.createElement("p");
         p.textContent = message;
         outputScreen.appendChild(p);
         }
-    function highlightPath(path) {
+            
+        function highlightPath(path) {
         // Önce tüm kenar ve düğümleri varsayılan renklerine döndür
         svg.selectAll(".link").style("stroke", "#999").style("stroke-opacity", 0.6);
         svg.selectAll(".node circle").attr("fill", d => colorScale(d.size)); // Varsayılan düğüm rengi
@@ -363,7 +452,7 @@
                 
                 // Görseli HTML sayfasında göstermek için bir <img> etiketi ekleyelim
                 const imageElement = document.createElement('img');
-                imageElement.src = "bst_visualization.png";  // Görsel yolunu belirliyoruz
+                imageElement.src = `generated_images/bst_visualization_${data.name}.png`;  // Görsel yolunu belirliyoruz
                 imageElement.alt = 'BST Görseli';  // Görsel için alternatif metin
                 imageElement.style.maxWidth = '100%';  // Görsel boyutunu ayarlamak
                 imageElement.style.height = 'auto';  // Yüksekliği otomatik yapmak
@@ -465,8 +554,8 @@
 
     // 7. En Uzun Yol
     document.getElementById('button7').addEventListener('click', async () => {
-        const authorA = document.getElementById('input7').value;
-
+        const name = document.getElementById('input7').value;
+        authorA=getAuthorNameById(name);
         if (authorA) {
             fetch('/wanted_7', {
                 method: 'POST',

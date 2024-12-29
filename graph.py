@@ -47,34 +47,4 @@ class Graph:
         """İki yazar arasındaki işbirliği sayısını döndür."""
         return self.edge_weights[author1].get(author2, 0)
     
-    def visualize(self,bst, filename="graph.png"):
-        # NetworkX grafiğini oluştur
-        G = nx.Graph()
-        
-        # Düğümleri ve kenarları ekle
-        for node, neighbors in self.adj_list.items():
-            G.add_node(node)
-            for neighbor in neighbors:
-                G.add_edge(node, neighbor)
-
-        # Düğümleri yerleştirmek için bir düzen kullan
-        pos = nx.spring_layout(G)
-
-        # Düğümleri çiz (renkler ve boyutlar dinamik olabilir)
-        node_colors = [self.get_node_color(node) for node in G.nodes()]
-        node_sizes = [self.get_node_size(node) for node in G.nodes()]
-
-        nx.draw_networkx_nodes(G, pos, node_color=node_colors, node_size=node_sizes)
-
-        # Kenarları çiz (kalınlıklar dinamik olabilir)
-        edge_widths = [self.get_edge_weight(u, v) for u, v in G.edges()]
-        nx.draw_networkx_edges(G, pos, width=edge_widths)
-
-        # Düğüm etiketlerini çiz
-        nx.draw_networkx_labels(G, pos)
-
-        # Grafik ayarları ve kaydetme
-        plt.title("Graph Visualization")
-        plt.axis("off")
-        plt.savefig(filename, format="PNG")
-        plt.close()
+   

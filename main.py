@@ -4,12 +4,10 @@ from essay_node import Essay
 from graph import Graph
 from isterler import Wanted
 from collections import defaultdict
-
+import random
 # Veriyi yükle
 data = pd.read_excel('DATASET.xlsx', nrows=1000)
-# Pyvis ağı - Fizik ayarları optimize edildi
-# g = Network(height="1500px", width="2000px", bgcolor='#444444', font_color='white', notebook=False)
-# g.barnes_hut()
+
 
 # Graph nesnesi
 graph = Graph()
@@ -43,7 +41,7 @@ for _, row in data.iterrows():
                 continue  # Kendisiyle bağlantı oluşturmayı engelle
             
             if coauthor not in unique_authors:
-                unique_authors[coauthor] = Author("None", coauthor)
+                unique_authors[coauthor] = Author(f"{random.randint(0,10000)}", coauthor)
                 graph.add_node(coauthor)
             
             # Sadece ana yazar ile coauthor arasında bağlantı oluştur
