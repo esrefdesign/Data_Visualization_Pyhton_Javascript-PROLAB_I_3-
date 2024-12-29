@@ -46,6 +46,12 @@ paper_title: Essay's Name
     .Networkx
     .D3.js
 
-    
+-----------    
+How to use
+----------
 
+-Clone this github repo (https://github.com/esrefdesign/Data_Visualization_Pyhton_Javascript-PROLAB_I_3-)
+-Install necessary libraries ({pip install networkx},{pip install matplotlib},{pip install flask},{pip install flask-cors}) 
+-Run wanted_api.py 
+-Search in browser localhost:5000/static/index.html
 
