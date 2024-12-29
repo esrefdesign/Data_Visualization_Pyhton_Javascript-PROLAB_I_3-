@@ -106,11 +106,11 @@ class Wanted:
         # Visualize the BST
         bst.build_from_graph(self.graph, author_name)  # Başlangıç yazarı "Alice"
         # BST'yi görselleştir ve dosya yolunu al
-        filename = bst.visualize()
+        filename = bst.visualize(author_name)
 
         # Return the result as a dictionary
         result = {
-            "queue": priority_queue_content,
+            "name": author_name,
             "bst": filename,
         }
 

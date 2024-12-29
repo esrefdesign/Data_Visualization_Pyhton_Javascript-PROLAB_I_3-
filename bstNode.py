@@ -63,10 +63,11 @@ class BST:
                 visited.add(author)
                 queue.extend(graph.adj_list.get(author, []))
 
-    def visualize(self, filename="web/static/bst_visualization.png"):
+    def visualize(self,start_author):
         """
         BST'yi bir grafik olarak görselleştirir ve kaydeder.
         """
+        filename = f"web/static/generated_images/bst_visualization_{start_author}.png"
         if not self.root:
             raise ValueError("Ağaç boş, görselleştirilecek düğüm yok.")
 
@@ -80,7 +81,7 @@ class BST:
 
         # Düğümleri ve kenarları çiz
         plt.figure(figsize=(10, 10))
-        nx.draw(G, pos, with_labels=True, arrows=False, node_size=2000, node_color="lightblue", font_size=10)
+        nx.draw(G, pos, with_labels=True, arrows=False, node_size=2000, node_color="lightblue", font_size=2)
         
         # Başlık ve kaydetme
         plt.title("Balanced BST Visualization")

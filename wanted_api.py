@@ -2,6 +2,32 @@ from flask import Flask, request, jsonify,render_template
 from main import unique_authors, unique_essasys,graph
 from isterler import Wanted
 from flask_cors import CORS
+import time
+import os
+import shutil
+import signal
+
+
+
+# Görsellerin saklandığı dizin
+GENERATED_IMAGES_FOLDER = "web/static/generated_images"
+
+# Kapanışta çağrılacak fonksiyon
+def cleanup_generated_images():
+    if os.path.exists(GENERATED_IMAGES_FOLDER):
+        # Klasörü ve içindeki dosyaları sil
+        shutil.rmtree(GENERATED_IMAGES_FOLDER)
+        print(f"{GENERATED_IMAGES_FOLDER} klasörü temizlendi.")
+
+# Signal yakalayıcı (CTRL+C veya process stop)
+def handle_exit_signal(signum, frame):
+    cleanup_generated_images()
+    exit(0)
+
+# Signal'i yakala
+signal.signal(signal.SIGINT, handle_exit_signal)  # CTRL+C
+signal.signal(signal.SIGTERM, handle_exit_signal)  # Termination signal
+
 
 app = Flask(__name__, 
             static_url_path="",
@@ -17,6 +43,8 @@ def get_graph():
     nodes = [
         {
             "name": author,
+            "id": unique_authors[author].orcid,
+            "essay":[f"{essay.title}" for essay in unique_authors[author].essay],
             "size": graph.get_node_size(author),
         }
         for author in graph.adj_list.keys()
@@ -70,6 +98,7 @@ def wanted_3():
 
     wanteds = Wanted(graph, unique_authors, unique_essasys)
     result = wanteds.wanted_3(author_name)
+    time.sleep(2)
     return jsonify(result), 200
 
 @app.route('/wanted_4', methods=['POST'])
@@ -112,4 +141,7 @@ def wanted_7():
     return jsonify(result), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    try:
+        app.run(debug=True)
+    finally:
+        cleanup_generated_images()
