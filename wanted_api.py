@@ -12,12 +12,16 @@ import signal
 # Görsellerin saklandığı dizin
 GENERATED_IMAGES_FOLDER = "web/static/generated_images"
 
-# Kapanışta çağrılacak fonksiyon
 def cleanup_generated_images():
     if os.path.exists(GENERATED_IMAGES_FOLDER):
-        # Klasörü ve içindeki dosyaları sil
-        shutil.rmtree(GENERATED_IMAGES_FOLDER)
-        print(f"{GENERATED_IMAGES_FOLDER} klasörü temizlendi.")
+        # Klasörün içindeki tüm dosya ve alt klasörleri temizle
+        for file_or_dir in os.listdir(GENERATED_IMAGES_FOLDER):
+            file_or_dir_path = os.path.join(GENERATED_IMAGES_FOLDER, file_or_dir)
+            if os.path.isfile(file_or_dir_path) or os.path.islink(file_or_dir_path):
+                os.unlink(file_or_dir_path)  # Dosyaları veya sembolik linkleri sil
+            elif os.path.isdir(file_or_dir_path):
+                shutil.rmtree(file_or_dir_path)  # Alt klasörleri sil
+        print(f"{GENERATED_IMAGES_FOLDER} içeriği temizlendi.")
 
 # Signal yakalayıcı (CTRL+C veya process stop)
 def handle_exit_signal(signum, frame):

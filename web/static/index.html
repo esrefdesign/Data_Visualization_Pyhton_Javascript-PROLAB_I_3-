@@ -356,7 +356,7 @@
                            (d.source.name === targetName && d.target.name === sourceName); // Yönlü olmayan grafikler için
                 })
                 .style("stroke", "red") // Vurgu rengi
-                .style("stroke-opacity", 1); // Opaklığı artır
+                .style("stroke-opacity", 3); // Opaklığı artır
         }
     }
 
@@ -367,9 +367,9 @@
 
     // 1. En Kısa Yol
     document.getElementById('button1').addEventListener('click', async () => {
-        const name = document.getElementById('input7').value;
+        const name = document.getElementById('input1').value;
         authorA=getAuthorNameById(name);
-        const name2 = document.getElementById('input7').value;
+        const name2 = document.getElementById('input2').value;
         authorB=getAuthorNameById(name2);
 
         if (authorA && authorB) {
@@ -398,7 +398,7 @@
 
     // 2. Kuyruk Oluştur
     document.getElementById('button2').addEventListener('click', async () => {
-        const name = document.getElementById('input7').value;
+        const name = document.getElementById('input3').value;
         authorName=getAuthorNameById(name);
         if (!authorName) {
             alert("Lütfen bir yazar Name'si girin.");
@@ -434,7 +434,7 @@
 
     // 3. Kuyruktan BST Oluştur
     document.getElementById('button3').addEventListener('click', async () => {
-        const name = document.getElementById('input7').value;
+        const name = document.getElementById('input4').value;
         author=getAuthorNameById(name);
         if (author) {
             fetch('http://localhost:5000/wanted_3', {
@@ -474,7 +474,7 @@
 
     // 4. Kısa Yollar
     document.getElementById('button4').addEventListener('click', async () => {
-        const name = document.getElementById('input7').value;
+        const name = document.getElementById('input5').value;
         authorName=getAuthorNameById(name);
         if (!authorName) {
             alert("Lütfen bir yazar Name'si girin.");
@@ -511,7 +511,7 @@
 
     // 5. İşbirliği Yapan Yazar Sayısı
     document.getElementById('button5').addEventListener('click', async () => {
-        const name = document.getElementById('input7').value;
+        const name = document.getElementById('input6').value;
         authorA=getAuthorNameById(name);
         if (authorA) {
             try {
