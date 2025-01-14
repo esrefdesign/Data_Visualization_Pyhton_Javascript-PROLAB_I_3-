@@ -53,35 +53,5 @@ for _, row in data.iterrows():
                 graph.add_edge(author, coauthor)
         
 
-# Pyvis ağına düğümleri ekle
-# for author,author_obj in unique_authors.items():
-#     size = min(20 + 2*len(graph.adj_list[author]), 150)  # Bağlantı sayısına göre boyut
-#     color = '#00aaff' if len(graph.adj_list[author]) > 5 else '#7777ff'
-#     essays = [f"{essay.title} (ID: {essay.ID})" for essay in author_obj.essay]  # Makale bilgilerini al
-#     essays_text = "\n".join(essays) if essays else "No essays available"
-
-#     title = f"""
-#     {author}
-#     Connections:{len(graph.adj_list[author])}
-#     Essays:{essays_text}
-#     """ if len(graph.adj_list[author])!=1 else f"""
-#     {author}
-#     Connections:{graph.adj_list[author]}
-#     Essays:{essays_text}
-#     """
-   
-   
-#     g.add_node(author, label=author,title=title, size=size, color=color)
-
-# # Pyvis ağına kenarları ekle
-
-
-# print(len(edges))
-
-# for edge in edges:
-#     weight = graph.get_edge_weight(edge[0], edge[1])
-#     if(weight>1):
-#         print(weight)  # Get the collaboration count (edge weight)
-#     g.add_edge(edge[0], edge[1], width=weight, weight=weight)
 
 
