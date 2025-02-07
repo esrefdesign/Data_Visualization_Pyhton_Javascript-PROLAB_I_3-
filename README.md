@@ -43,7 +43,7 @@ paper_title: Essay's Name
 -Frameworks & Libraries
     .Flask
     .Mathplotlib
-    .Networkx
+    .Networkxes
     .D3.js
 
 -----------    
