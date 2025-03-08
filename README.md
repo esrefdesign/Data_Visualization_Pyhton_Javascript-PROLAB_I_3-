@@ -5,7 +5,7 @@ There are 1000 essay in excel table init orcid,doi,author_name,couathors,paper_t
 
 -------------------------------------------
 
-orcid: Author's Unique ID
+orcid: Author's Unique ID 
 
 doi: Essay's Unique ID
 
